@@ -1,0 +1,24 @@
+def answer_one():
+    energy = pd.read_excel('Energy Indicators.xls')
+    energy = energy.drop(energy.index[7:16])
+    energy = energy.dropna(axis=0, thresh = 3)
+    energy = energy.rename(columns = {"Unnamed: 1" : "Country", "Unnamed: 3": "Energy Supply", "Unnamed: 4" : "Energy Supply per Capita", "Unnamed: 5" : "% Renewable"})
+    energy = energy.drop(['Unnamed: 0', 'Environmental Indicators: Energy'], axis = 1)
+    energy = energy.replace(to_replace = '...', value = np.nan)
+    energy['Energy Supply'] = energy['Energy Supply']*1000000.0
+    energy['Country'] = energy['Country'].replace({'Iran (Islamic Republic of)' : 'Iran', "Republic of Korea": "South Korea", "United States of America": "United States", "United Kingdom of Great Britain and Northern Ireland": "United Kingdom", "China, Hong Kong Special Administrative Region": "Hong Kong", 'Bolivia (Plurinational State of)' : 'Bolivia', 'Venezuela (Bolivarian Republic of)' : 'Venezuela'})
+    GDP = pd.read_csv('world_bank.csv')
+    GDP = GDP.drop('World Development Indicators', axis = 1)
+    GDP = GDP.drop(GDP.ix[:,'Unnamed: 2':'Unnamed: 49'].head(0).columns, axis=1)
+    GDP = GDP.drop(GDP.index[0:4])
+    GDP = GDP.rename(columns = {'Data Source': 'Country', 'Unnamed: 50' : '2006', 'Unnamed: 51' : '2007', 'Unnamed: 52' : '2008', 'Unnamed: 53' : '2009', 'Unnamed: 54' : '2010', 'Unnamed: 55': '2011', 'Unnamed: 56': '2012', 'Unnamed: 57': '2013', 'Unnamed: 58': '2014', 'Unnamed: 59': '2015'})
+    GDP['Country'] = GDP['Country'].replace({"Korea, Rep.": "South Korea", "Iran, Islamic Rep.": "Iran", "Hong Kong SAR, China": "Hong Kong"})
+    ScimEn = pd.read_excel('scimagojr-3.xlsx')
+    merge = energy.merge(GDP, how = 'outer', on = 'Country').merge(ScimEn, how = 'outer', on = 'Country')
+    top_15 = merge[merge['Rank'] <= 15.0]
+    top_15 = top_15.set_index('Country')
+    return top_15
+
+     
+
+answer_one()
